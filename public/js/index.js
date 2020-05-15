@@ -187,7 +187,9 @@ var pop = $(document.querySelector("#copy")).popover();
 document.querySelector("#copy").onclick = async function(event) {
   let url = window.location.toString();
   let target = document.querySelector("#clipboard");
-  url = url.substring(0, url.indexOf('?'));
+  if(url.indexOf('?') > 0) {
+    url = url.substring(0, url.indexOf('?'));
+  }
   target.value = `${url}?c=${encodeURI(document.querySelector("#chars").value)}`;
   var currentFocus = document.activeElement;
   target.focus();
