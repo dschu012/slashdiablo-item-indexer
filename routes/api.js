@@ -1,6 +1,6 @@
 var express = require('express');
 var fetch = require('node-fetch');
-var d2s = require('d2s');
+var d2s = require('@dschu012/d2s');
 var constants = require('../lib/constants.bundle.min.json');
 var router = express.Router();
 

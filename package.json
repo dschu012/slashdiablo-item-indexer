@@ -1,7 +1,6 @@
 {
   "name": "slash-item-indexer",
   "version": "0.0.0",
-  "private": true,
   "scripts": {
     "start": "node ./bin/www"
   },
@@ -13,6 +12,6 @@
     "http-errors": "~1.6.3",
     "morgan": "~1.9.1",
     "node-fetch": "~2.6.0",
-    "d2s": "dschu012/d2s#v1.0.1"
+    "@dschu012/d2s": "~1.0.1"
   }
 }
