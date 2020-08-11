@@ -4,35 +4,37 @@
 <head>
   <title><%= title %></title>
   <link rel="stylesheet" href="/css/index.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/4.5.0/darkly/bootstrap.min.css" integrity="sha256-MwJT4aoRf8awkXH2gl6jjykb0GW7x7QeffW2n4608a0=" crossorigin="anonymous" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/4.5.0/darkly/bootstrap.min.css"
+    integrity="sha256-MwJT4aoRf8awkXH2gl6jjykb0GW7x7QeffW2n4608a0=" crossorigin="anonymous" />
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
     integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
     crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.0/js/bootstrap.bundle.min.js"
     integrity="sha256-Xt8pc4G0CdcRvI0nZ2lRpZ4VHng0EoUDMlGcBSQ9HiQ=" crossorigin="anonymous"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/rivets/0.9.6/rivets.bundled.min.js"
-    integrity="sha256-W79tvMHlloRixkQNrGjf2qz+nkjsuhRtV0N6duJOYnw=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 </head>
 
 <body>
-  <div class="container">
+  <div id="app" class="container">
+
     <form id="form" class="mt-3 container">
       <div class="row">
         <div class="col-4 offset-4">
           <div class="input-group">
-            <input type="text" name="chars" id="chars" class="form-control" placeholder="Enter your character names here" />
+            <input type="text" name="chars" id="chars" class="form-control" placeholder="Enter your character names here" v-model="chars" />
             <input type="text" style="position:absolute; top:-1000px" id="clipboard" />
             <span class="input-group-btn">
-              <button class="btn btn-default btn-primary" type="submit">Go!</button>
-              <button class="btn btn-default btn-primary" id="copy" type="button" data-content="Link Copied to Clipboard">Share</button>
+              <button class="btn btn-default btn-primary" type="button" v-on:click="fetchCharacters">Go!</button>
+              <button class="btn btn-default btn-primary" id="copy" type="button" data-content="Link Copied to Clipboard" v-on:click="copyToClipboard">Share</button>
             </span>
           </div>
         </div>
       </div>
     </form>
-    <div rv-if="scope.items">
-      <div class="mt-3 alert alert-danger" role="alert" rv-if="scope.items.errors">
-        Error retreiving data for: { scope.items.errors }
+
+    <div v-if="charsData">
+      <div class="mt-3 alert alert-danger" role="alert" v-if="errors">
+        Error retreiving data for: {{ errors }}
       </div>
       <ul class="mt-3 nav nav-pills justify-content-center">
         <li class="nav-item">
@@ -44,32 +46,42 @@
         <li class="nav-item">
           <a class="nav-link" data-toggle="tab" href="#crafts" role="tab">Available Crafts</a>
         </li>
+        <li class="nav-item">
+          <a class="nav-link" data-toggle="tab" href="#links" role="tab">Armory Links</a>
+        </li>
       </ul>
       <div class="tab-content mt-2">
         <div class="tab-pane fade show active" id="items" role="tabpanel">
-          <div rv-each-q="scope.items.all_qualities">
-            <div class="quality" rv-clazz="q" rv-each-item="scope.items.all_items | quality q">
-              { item | name }
+          <div v-for="group in allItemsGroupedByQuality">
+            <div class="item-wrapper quality" v-bind:class="group.quality" v-for="item in group.items">
+              <span class="item" data-toggle="popover" data-html="true" v-bind:data-content="item | stats">{{ item | itemName }}</span>
             </div>
           </div>
-          <div class="quality _0" rv-each-item="scope.items.all_stacks">
-            { item.count }x { item | name }
+          <div class="item-wrapper quality _0" v-for="item in allStacks">
+            <span class="item" data-toggle="popover" data-html="true" v-bind:data-content="item | stats">{{ item.count }}x {{ item | itemName }}</span>
           </div>
         </div>
         <div class="tab-pane fade" id="runewords" role="tabpanel">
-          <div class="alert alert-warning" role="alert"  rv-if="scope.runewords | empty">
+          <div class="alert alert-warning" role="alert"  v-if="!availableRunewords.length">
             No Runewords can be made with your current runes.
           </div>
           <div>
-            <span class="badge badge-secondary m-2" rv-each-rune="scope.items.all_stacks | runes">
-              { rune.count }x { rune | name }
+            <span class="badge badge-secondary m-2" v-for="rune in allRunes">
+              {{ rune.count }}x {{ rune | itemName }}
             </span>
           </div>
-          <div rv-each-runeword="scope.runewords">
-            <span><a rv-href="runeword | runeword_link" target="_blank">{ runeword.name }</a></span> - { runeword.runes }
+          <div v-for="runeword in availableRunewords">
+            <span><a v-bind:href="runeword | runewordLink" target="_blank">{{ runeword.name }}</a></span> - {{ runeword.runes }}
           </div>
         </div>
-        <div class="tab-pane fade" id="crafts" role="tabpanel" rv-html="scope.items | crafts"></div>
+        <div class="tab-pane fade" id="crafts" role="tabpanel">
+          Nothing here...
+        </div>
+        <div class="tab-pane fade" id="links" role="tabpanel">
+          <ul v-for="charData in charsData">
+            <li><a v-bind:href="charData | armoryLink" target="_blank">{{charData.name}}</a></li>
+          </ul>
+        </div>
       </div>
     </div>
   </div>

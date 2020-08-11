@@ -56,3 +56,15 @@
 .quality._0 {
   color: var(--color-00);
 }
+
+[data-toggle="popover"] {
+  cursor: pointer;
+}
+
+.item-wrapper {
+  padding: 3px;
+}
+
+.item-wrapper .item {
+  margin: 5px;
+}
