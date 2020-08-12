@@ -43,6 +43,15 @@ let app = new Vue({
       if (item.rare_name2) {
         name = `${name} ${item.rare_name2}`;
       }
+      if (item.quality == 3) {
+        name = `Superior ${name}`;
+      }
+      if (item.socketed) {
+        name = `${name} (${item.total_nr_of_sockets})`;
+      }
+      if (item.ethereal) {
+        name = `${name} [Eth]`;
+      }
       return name;
     },
     stats(item) {
@@ -73,7 +82,7 @@ let app = new Vue({
         .filter(d => d.data != null)
         .map(d => d.data)
         .flatMap(d => [...d.items, ...(d.merc_items || [])])
-        .filter(d => d.quality !== 0)
+        .filter(d => d.quality !== 0 && d.starter_item == 0)
         .sort((o1, o2) => that.$options.filters.itemName(o1).localeCompare(that.$options.filters.itemName(o2)))
     },
     allStacks: function () {

@@ -57,6 +57,10 @@
   color: var(--color-00);
 }
 
+.quality._0.ethereal, .quality._1.ethereal, .quality._2.ethereal {
+  color: var(--color-05) !important;
+}
+
 [data-toggle="popover"] {
   cursor: pointer;
 }
