@@ -18,6 +18,7 @@ router.get('/', async function(req, res, next) {
         json = await d2s.read(binary, constants);
         data.push({name: n, data: json });
       } catch(e) {
+        console.log(e);
         data.push({name: n, data: null });
       }
     } else {

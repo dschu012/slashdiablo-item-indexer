@@ -15,7 +15,8 @@ let app = new Vue({
   mounted() {
     $(this.$el).popover({
       selector: '[data-toggle="popover"]',
-      trigger: 'hover'
+      trigger: 'hover',
+      placement: function() { return $(window).width() < 975 ? 'bottom' : 'right'; }
     });
     $('[data-toggle="tab"]').tab();
   },
