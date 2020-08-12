@@ -71,7 +71,7 @@
             </span>
           </div>
           <div v-for="runeword in availableRunewords">
-            <span><a v-bind:href="runeword | runewordLink" target="_blank">{{ runeword.name }}</a></span> - {{ runeword.runes }}
+            <span>{{ runeword.count }}x <a v-bind:href="runeword | runewordLink" target="_blank">{{ runeword.name }}</a></span> - {{ runeword.runes }}
           </div>
         </div>
         <div class="tab-pane fade" id="crafts" role="tabpanel">

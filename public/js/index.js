@@ -139,6 +139,13 @@ let app = new Vue({
         }
         return true;
       })
+      .map(runeword => {
+        return {
+          "name": runeword.name,
+          "runes": runeword.runes,
+          "count": Math.min(...Object.keys(runeword.r).map(rune => this.runeCounts[rune] / runeword.r[rune]))
+        }
+      })
       .sort((o1, o2) => o1.name.localeCompare(o2.name));
     }
   },
