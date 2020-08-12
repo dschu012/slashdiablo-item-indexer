@@ -495,7 +495,7 @@ window.runewords = [
     }
   },
   {
-    "name": "Patter",
+    "name": "Pattern",
     "runes": "TalOrtTir",
     "r": {
       "r07": 1,
