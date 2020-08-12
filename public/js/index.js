@@ -73,7 +73,12 @@ let app = new Vue({
   },
   computed: {
     errors: function() {
-      return null;
+      let that = this;
+      if (!this.charsData) return null;
+      return this.charsData
+        .filter(d => d.data == null)
+        .map(d => d.name)
+        .join(", ");
     },
     allItems: function () {
       let that = this;
