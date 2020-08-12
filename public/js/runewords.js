@@ -495,15 +495,6 @@ window.runewords = [
     }
   },
   {
-    "name": "Pattern",
-    "runes": "TalOrtTir",
-    "r": {
-      "r07": 1,
-      "r09": 1,
-      "r03": 1
-    }
-  },
-  {
     "name": "Peace",
     "runes": "ShaelThulAmn",
     "r": {
