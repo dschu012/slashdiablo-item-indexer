@@ -1,3 +1,5 @@
+const ITEM_LOCATIONS = { 1: "inv", 4: "cube", 5: "stash" };
+
 let app = new Vue({
   el: "#app",
   data: {
@@ -56,14 +58,20 @@ let app = new Vue({
       return name;
     },
     stats(item) {
-      if (item.combined_magic_attributes == null) {
-        return;
+      let str = ``;
+      if (item.combined_magic_attributes != null) {
+        str = item.combined_magic_attributes
+          .filter(attr => attr.visible !== false)
+          .map(attr => attr.description)
+          .join(', ');
+        str = `(${str})`;
       }
-      let str = item.combined_magic_attributes
-        .filter(attr => attr.visible !== false)
-        .map(attr => attr.description)
-        .join(', ');
-      return ` (${str})`;
+      if (item.character && !item.count) {
+        str += `<div class="mt-1 text-right"><a href="https://armory.slashdiablo.net/character/${item.character.toLowerCase()}#inventory">${item.character}</a>`;
+        if(ITEM_LOCATIONS[item.alt_position_id]) str += ` - <i>${ITEM_LOCATIONS[item.alt_position_id]} (${item.position_x}, ${item.position_y})</i>`;
+        str += `</div>`;
+      }
+      return str;
     },
     runewordLink(runeword) {
       return `https://diablo2.diablowiki.net/${encodeURIComponent(runeword.name)}`;
@@ -197,6 +205,13 @@ let app = new Vue({
         alert('error communicating w/ api');
       }
       let d = await response.json();
+      for(let c of d) {
+        if(c.data != null) {
+          [...c.data.items, ...(c.data.merc_items || [])]
+            .forEach(d => d.character = c.name);
+        }
+      }
+      
       //set quality 0 if null
       d
         .filter(d => d.data != null)
