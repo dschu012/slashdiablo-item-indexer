@@ -48,6 +48,11 @@
         <li class="nav-item">
           <a class="nav-link" data-toggle="tab" href="#crafts" role="tab">Available Crafts</a>
         </li>
+        <!--
+        <li class="nav-item">
+          <a class="nav-link" data-toggle="tab" href="#cube-recipes" role="tab">Available Cube Recipes</a>
+        </li>
+        -->
         <li class="nav-item">
           <a class="nav-link" data-toggle="tab" href="#links" role="tab">Armory Links</a>
         </li>
@@ -77,7 +82,32 @@
           </div>
         </div>
         <div class="tab-pane fade" id="crafts" role="tabpanel">
-          Nothing here...
+          <span class="badge badge-secondary m-2" v-for="rune in allRunes">
+            {{ rune.count }}x {{ rune | itemName }}
+          </span>
+          <span class="badge badge-secondary m-2" v-for="gem in allGems">
+            {{ gem.count }}x {{ gem | itemName }}
+          </span>
+          <span class="badge badge-secondary m-2" v-if="allJewels.length > 0">
+            {{ allJewels.length }}x Jewel(s)
+          </span>
+          <div v-for="craft in availableCrafts">
+            <span>{{ craft.count }}x {{ craft.name }} - {{ craft.recipe }}</span>
+          </div>
+        </div>
+        <div class="tab-pane fade" id="cube-recipes" role="tabpanel">
+          <span class="badge badge-secondary m-2" v-for="rune in allRunes">
+            {{ rune.count }}x {{ rune | itemName }}
+          </span>
+          <span class="badge badge-secondary m-2" v-for="gem in allGems">
+            {{ gem.count }}x {{ gem | itemName }}
+          </span>
+          <span class="badge badge-secondary m-2" v-if="allJewels.length > 0">
+            {{ allJewels.length }}x Jewel(s)
+          </span>
+          <div v-for="cubeRecipe in availableCubeRecipes">
+            <span>{{ cubeRecipe.count }}x {{ cubeRecipe.name }} - {{ cubeRecipe.recipe }}</span>
+          </div>
         </div>
         <div class="tab-pane fade" id="links" role="tabpanel">
           <ul v-for="charData in charsData">
@@ -88,6 +118,8 @@
     </div>
   </div>
   <script src="/js/runewords.js"></script>
+  <script src="/js/crafts.js"></script>
+  <script src="/js/cube.js"></script>
   <script src="/js/index.js"></script>
 </body>
 

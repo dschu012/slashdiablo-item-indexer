@@ -82,8 +82,7 @@ let app = new Vue({
   },
   computed: {
     errors: function() {
-      let that = this;
-      if (!this.charsData) return null;
+      if (!this.charsData) return;
       return this.charsData
         .filter(d => d.data == null)
         .map(d => d.name)
@@ -91,7 +90,7 @@ let app = new Vue({
     },
     allItems: function () {
       let that = this;
-      if (!this.charsData) return null;
+      if (!this.charsData) return;
       return this.charsData
         .filter(d => d.data != null)
         .map(d => d.data)
@@ -101,18 +100,18 @@ let app = new Vue({
     },
     allStacks: function () {
       let that = this;
-      if (!this.charsData) return null;
+      if (!this.charsData) return;
       return Object.values(this.charsData
         .filter(d => d.data != null)
         .map(d => d.data)
         .flatMap(d => [...d.items, ...(d.merc_items || [])])
         .filter(d => d.quality === 0)
         .reduce((accumulator, currentValue) => {
-          if (currentValue.type in accumulator) {
-            accumulator[currentValue.type].count++;
+          if (currentValue.custom_type in accumulator) {
+            accumulator[currentValue.custom_type].count++;
           } else {
             currentValue.count = 1;
-            accumulator[currentValue.type] = currentValue;
+            accumulator[currentValue.custom_type] = currentValue;
           }
           return accumulator
         }, {}))
@@ -130,19 +129,32 @@ let app = new Vue({
       if (!this.allStacks) return;
       return this.allStacks.filter(i => i.type.match(/r\d\d/));
     },
-    runeCounts: function() {
-      if (!this.allRunes) return;
-      return this.allRunes
+    allGems: function() {
+      if (!this.allStacks) return;
+      return this.allStacks.filter(i => i.type.match(/g[a-z]{2}/));
+    },
+    allJewels: function() {
+      if (!this.allItems) return;
+      return this.allItems.filter(i => i.type.match(/jew/));
+    },
+    itemCounts: function() {
+      if (!this.charsData) return;
+      return this.charsData
+      .filter(d => d.data != null)
+      .map(d => d.data)
+      .flatMap(d => [...d.items, ...(d.merc_items || [])])
       .reduce((accumulator, currentValue) => { 
-        accumulator[currentValue.type] = currentValue.count ;
+        if(currentValue.count) {
+          accumulator[currentValue.custom_type] = currentValue.count;
+        }
         return accumulator;
       }, {});
     },
     availableRunewords: function() {
-      if(!this.runeCounts) return;
+      if(!this.itemCounts) return;
       return window.runewords.filter(v => {
-        for(const rune in v.r) {
-          if((this.runeCounts[rune] || 0) < v.r[rune]) {
+        for(const item in v.r) {
+          if((this.itemCounts[item] || 0) < v.r[item]) {
             return false;
           }
         }
@@ -152,10 +164,46 @@ let app = new Vue({
         return {
           "name": runeword.name,
           "runes": runeword.runes,
-          "count": Math.min(...Object.keys(runeword.r).map(rune => this.runeCounts[rune] / runeword.r[rune]))
+          "count": Math.floor(Math.min(...Object.keys(runeword.r).map(rune => this.itemCounts[rune] / runeword.r[rune])))
         }
       })
       .sort((o1, o2) => o1.name.localeCompare(o2.name));
+    },
+    availableCrafts: function() {
+      if(!this.itemCounts) return;
+      return window.crafts.filter(v => {
+        for(const item in v.r) {
+          if((this.itemCounts[item] || 0) < v.r[item]) {
+            return false;
+          }
+        }
+        return true;
+      })
+      .map(craft => {
+        return {
+          "name": craft.name,
+          "recipe": craft.recipe.join(", "),
+          "count": Math.floor(Math.min(...Object.keys(craft.r).map(item => this.itemCounts[item] / craft.r[item])))
+        }
+      });
+    },
+    availableCubeRecipes: function() {
+      if(!this.itemCounts) return;
+      return window.cube.filter(v => {
+        for(const item in v.r) {
+          if((this.itemCounts[item] || 0) < v.r[item]) {
+            return false;
+          }
+        }
+        return true;
+      })
+      .map(cubeRecipe => {
+        return {
+          "name": cubeRecipe.name,
+          "recipe": cubeRecipe.recipe.join(", "),
+          "count": Math.floor(Math.min(...Object.keys(cubeRecipe.r).map(item => this.itemCounts[item] / cubeRecipe.r[item])))
+        }
+      });
     }
   },
   methods: {
@@ -226,6 +274,33 @@ let app = new Vue({
         .flatMap(d => [...d.items, ...(d.merc_items || [])])
         .filter(d => d.given_runeword === 1)
         .forEach(d => { d.quality = 9 });
+
+      //our own code per item type/quality to group items together
+      d
+        .filter(d => d.data != null)
+        .map(d => d.data)
+        .flatMap(d => [...d.items, ...(d.merc_items || [])])
+        .forEach(d => { 
+          d.custom_type = d.type;
+          if(d.quality == 7) {
+            d.custom_type = `u${d.unique_id}`;
+          } else if(d.quality == 5) {
+            d.custom_type = `s${d.set_id}`;
+          }
+        });
+      d 
+        .filter(d => d.data != null)
+        .map(d => d.data)
+        .flatMap(d => [...d.items, ...(d.merc_items || [])])
+        .reduce((accumulator, currentValue) => {
+          if (currentValue.custom_type in accumulator) {
+            accumulator[currentValue.custom_type].count++;
+          } else {
+            currentValue.count = 1;
+            accumulator[currentValue.custom_type] = currentValue;
+          }
+          return accumulator
+        }, {});
       this.charsData = d;
     }
   }
