@@ -66,7 +66,7 @@ let app = new Vue({
           .join(', ');
         str = `(${str})`;
       }
-      if (item.character && !item.count) {
+      if (item.character) {
         str += `<div class="mt-1 text-right"><a href="https://armory.slashdiablo.net/character/${item.character.toLowerCase()}#inventory">${item.character}</a>`;
         if(ITEM_LOCATIONS[item.alt_position_id]) str += ` - <i>${ITEM_LOCATIONS[item.alt_position_id]} (${item.position_x}, ${item.position_y})</i>`;
         str += `</div>`;
