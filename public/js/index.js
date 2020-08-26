@@ -3,22 +3,18 @@ const ITEM_LOCATIONS = { 1: "inv", 4: "cube", 5: "stash" };
 let app = new Vue({
   el: "#app",
   data: {
-    chars: null,
+    chars: document.slash_item_tools.chars,
+    rawData: document.slash_item_tools.charsData,
     charsData: null
   },
   created() {
-    this.chars = window.location.search
-      ? new URLSearchParams(window.location.search).getAll('c').join(', ')
-      : window.localStorage.getItem('chars');
-    if (this.chars) {
-      this.fetchCharacters();
-    }
+    this.handleCharData();
   },
   mounted() {
     $(this.$el).popover({
       selector: '[data-toggle="popover"]',
       trigger: 'hover',
-      placement: function() { return $(window).width() < 975 ? 'bottom' : 'right'; }
+      placement: function () { return $(window).width() < 975 ? 'bottom' : 'right'; }
     });
     $('[data-toggle="tab"]').tab();
   },
@@ -68,7 +64,7 @@ let app = new Vue({
       }
       if (item.character) {
         str += `<div class="mt-1 text-right"><a href="https://armory.slashdiablo.net/character/${item.character.toLowerCase()}#inventory">${item.character}</a>`;
-        if(ITEM_LOCATIONS[item.alt_position_id]) str += ` - <i>${ITEM_LOCATIONS[item.alt_position_id]} (${item.position_x}, ${item.position_y})</i>`;
+        if (ITEM_LOCATIONS[item.alt_position_id]) str += ` - <i>${ITEM_LOCATIONS[item.alt_position_id]} (${item.position_x}, ${item.position_y})</i>`;
         str += `</div>`;
       }
       return str;
@@ -81,7 +77,7 @@ let app = new Vue({
     }
   },
   computed: {
-    errors: function() {
+    errors: function () {
       if (!this.charsData) return;
       return this.charsData
         .filter(d => d.data == null)
@@ -125,85 +121,85 @@ let app = new Vue({
       }).reverse();
       return o;
     },
-    allRunes: function() {
+    allRunes: function () {
       if (!this.allStacks) return;
       return this.allStacks.filter(i => i.type.match(/r\d\d/));
     },
-    allGems: function() {
+    allGems: function () {
       if (!this.allStacks) return;
       return this.allStacks.filter(i => i.type.match(/g[a-z]{2}/));
     },
-    allJewels: function() {
+    allJewels: function () {
       if (!this.allItems) return;
       return this.allItems.filter(i => i.type.match(/jew/));
     },
-    itemCounts: function() {
+    itemCounts: function () {
       if (!this.charsData) return;
       return this.charsData
-      .filter(d => d.data != null)
-      .map(d => d.data)
-      .flatMap(d => [...d.items, ...(d.merc_items || [])])
-      .reduce((accumulator, currentValue) => { 
-        if(currentValue.count) {
-          accumulator[currentValue.custom_type] = currentValue.count;
-        }
-        return accumulator;
-      }, {});
+        .filter(d => d.data != null)
+        .map(d => d.data)
+        .flatMap(d => [...d.items, ...(d.merc_items || [])])
+        .reduce((accumulator, currentValue) => {
+          if (currentValue.count) {
+            accumulator[currentValue.custom_type] = currentValue.count;
+          }
+          return accumulator;
+        }, {});
     },
-    availableRunewords: function() {
-      if(!this.itemCounts) return;
+    availableRunewords: function () {
+      if (!this.itemCounts) return;
       return window.runewords.filter(v => {
-        for(const item in v.r) {
-          if((this.itemCounts[item] || 0) < v.r[item]) {
+        for (const item in v.r) {
+          if ((this.itemCounts[item] || 0) < v.r[item]) {
             return false;
           }
         }
         return true;
       })
-      .map(runeword => {
-        return {
-          "name": runeword.name,
-          "runes": runeword.runes,
-          "count": Math.floor(Math.min(...Object.keys(runeword.r).map(rune => this.itemCounts[rune] / runeword.r[rune])))
-        }
-      })
-      .sort((o1, o2) => o1.name.localeCompare(o2.name));
+        .map(runeword => {
+          return {
+            "name": runeword.name,
+            "runes": runeword.runes,
+            "count": Math.floor(Math.min(...Object.keys(runeword.r).map(rune => this.itemCounts[rune] / runeword.r[rune])))
+          }
+        })
+        .sort((o1, o2) => o1.name.localeCompare(o2.name));
     },
-    availableCrafts: function() {
-      if(!this.itemCounts) return;
+    availableCrafts: function () {
+      if (!this.itemCounts) return;
       return window.crafts.filter(v => {
-        for(const item in v.r) {
-          if((this.itemCounts[item] || 0) < v.r[item]) {
+        for (const item in v.r) {
+          if ((this.itemCounts[item] || 0) < v.r[item]) {
             return false;
           }
         }
         return true;
       })
-      .map(craft => {
-        return {
-          "name": craft.name,
-          "recipe": craft.recipe.join(", "),
-          "count": Math.floor(Math.min(...Object.keys(craft.r).map(item => this.itemCounts[item] / craft.r[item])))
-        }
-      });
+        .map(craft => {
+          return {
+            "name": craft.name,
+            "recipe": craft.recipe.join(", "),
+            "count": Math.floor(Math.min(...Object.keys(craft.r).map(item => this.itemCounts[item] / craft.r[item])))
+          }
+        });
     },
-    availableCubeRecipes: function() {
-      if(!this.itemCounts) return;
+    availableCubeRecipes: function () {
+      if (!this.itemCounts) return;
       return window.cube.filter(v => {
-        for(const item in v.r) {
-          if((this.itemCounts[item] || 0) < v.r[item]) {
+        for (const item in v.r) {
+          if ((this.itemCounts[item] || 0) < v.r[item]) {
             return false;
           }
         }
         return true;
       })
-      .map(cubeRecipe => {
-        return {
-          "name": cubeRecipe.name,
-          "recipe": cubeRecipe.recipe.join(", "),
-          "count": Math.floor(Math.min(...Object.keys(cubeRecipe.r).map(item => this.itemCounts[item] / cubeRecipe.r[item])))
-        }
-      });
+        .map(cubeRecipe => {
+          return {
+            "name": cubeRecipe.name,
+            "recipe": cubeRecipe.recipe.join(", "),
+            "count": Math.floor(Math.min(...Object.keys(cubeRecipe.r).map(item => this.itemCounts[item] / cubeRecipe.r[item])))
+          }
+        });
     }
   },
   methods: {
@@ -225,14 +221,16 @@ let app = new Vue({
     },
     storeChars() {
       if (!window.location.search) {
-        window.localStorage.setItem('chars', this.chars);
+        let d = new Date();
+        d.setTime(d.getTime() + (365*24*60*60*1000));
+        document.cookie = `chars=${this.chars}; expires=${d.toUTCString()}; path=/`;
       }
     },
     copyToClipboard() {
       let pop = $(document.querySelector("#copy")).popover();
       let url = window.location.toString();
       let target = document.querySelector("#clipboard");
-      if(url.indexOf('?') > 0) {
+      if (url.indexOf('?') > 0) {
         url = url.substring(0, url.indexOf('?'));
       }
       target.value = `${url}?c=${encodeURI(document.querySelector("#chars").value)}`;
@@ -244,6 +242,11 @@ let app = new Vue({
       pop.popover('show');
       setTimeout(() => pop.popover('hide'), 1000);
     },
+    async fetchAndHandlerCharData() {
+      this.charData = [];
+      await this.fetchCharacters();
+      await this.handleCharData();
+    },
     async fetchCharacters() {
       this.storeChars();
       let url = new URL('/api', window.location.href);
@@ -252,14 +255,17 @@ let app = new Vue({
       if (!response.ok) {
         alert('error communicating w/ api');
       }
-      let d = await response.json();
-      for(let c of d) {
-        if(c.data != null) {
+      this.rawData = await response.json();
+    },
+    handleCharData() {
+      let d = this.rawData;
+      for (let c of d) {
+        if (c.data != null) {
           [...c.data.items, ...(c.data.merc_items || [])]
             .forEach(d => d.character = c.name);
         }
       }
-      
+
       //set quality 0 if null
       d
         .filter(d => d.data != null)
@@ -280,15 +286,15 @@ let app = new Vue({
         .filter(d => d.data != null)
         .map(d => d.data)
         .flatMap(d => [...d.items, ...(d.merc_items || [])])
-        .forEach(d => { 
+        .forEach(d => {
           d.custom_type = d.type;
-          if(d.quality == 7) {
+          if (d.quality == 7) {
             d.custom_type = `u${d.unique_id}`;
-          } else if(d.quality == 5) {
+          } else if (d.quality == 5) {
             d.custom_type = `s${d.set_id}`;
           }
         });
-      d 
+      d
         .filter(d => d.data != null)
         .map(d => d.data)
         .flatMap(d => [...d.items, ...(d.merc_items || [])])
