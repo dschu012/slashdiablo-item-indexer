@@ -7,9 +7,9 @@ router.get('/', async function(req, res, next) {
   let data = [];
   let chars = null;
   if(req.query.c) {
-    chars = req.query.c;
+    chars = decodeURI(req.query.c);
   } else if(req.cookies["chars"]) {
-    chars = req.cookies["chars"];
+    chars = decodeURI(req.cookies["chars"]);
   }
   if(chars) {
     data = await d2sApi.fetch_chars(chars)

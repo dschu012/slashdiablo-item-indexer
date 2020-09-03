@@ -18,7 +18,7 @@
   <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
   <script>
     document.slash_item_tools = {
-      chars: "<%- chars %>",
+      chars: "<%- decodeURI(chars) %>",
       charsData: <%- JSON.stringify(data) %>
     }
   </script>
@@ -69,7 +69,10 @@
         <div class="tab-pane fade show active" id="items" role="tabpanel">
           <div v-for="group in allItemsGroupedByQuality">
             <div class="item-wrapper quality" v-bind:class="[group.quality, item.ethereal ? 'ethereal' : '']" v-for="item in group.items">
-              <span class="item" data-toggle="popover" data-html="true" v-bind:data-content="item | stats">{{ item | itemName }}</span>
+              <span v-if="item.quality == 3 || item.quality == 4 || item.quality == 6 || item.quality == 8"
+                data-toggle="popover" data-html="true" v-bind:data-content="item | popover">{{ item | itemName }} - {{item | stats}}</span>
+              <span v-else class="item" data-toggle="popover" data-html="true" v-bind:data-content="item | popover">{{ item | itemName }}
+              </span>
             </div>
           </div>
           <div class="item-wrapper quality _0" v-for="item in allStacks">

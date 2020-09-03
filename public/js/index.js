@@ -62,6 +62,18 @@ let app = new Vue({
           .join(', ');
         str = `(${str})`;
       }
+      return str;
+    },
+    popover(item) {
+      //why cant i call this.$filters.stats?
+      let str = ``;
+      if (item.combined_magic_attributes != null) {
+        str = item.combined_magic_attributes
+          .filter(attr => attr.visible !== false)
+          .map(attr => attr.description)
+          .join(', ');
+        str = `(${str})`;
+      }
       if (item.character) {
         str += `<div class="mt-1 text-right"><a href="https://armory.slashdiablo.net/character/${item.character.toLowerCase()}#inventory">${item.character}</a>`;
         if (ITEM_LOCATIONS[item.alt_position_id]) str += ` - <i>${ITEM_LOCATIONS[item.alt_position_id]} (${item.position_x}, ${item.position_y})</i>`;
