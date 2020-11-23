@@ -3,7 +3,7 @@ const d2s = require('@dschu012/d2s');
 const constants = require('../lib/constants.bundle.min.json');
 
 async function fetch_char(n) {
-  let response = await fetch(`https://armory.slashdiablo.net/retrieving/v1/character?name=${n}`);
+  let response = await fetch(`https://armory.slashdiablo.net/api/v1/characters?name=${n}`);
     if (response.ok) {
       let json = await response.json();
       try {
