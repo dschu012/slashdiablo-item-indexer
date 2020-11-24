@@ -3,12 +3,15 @@ const ITEM_LOCATIONS = { 1: "inv", 4: "cube", 5: "stash" };
 let app = new Vue({
   el: "#app",
   data: {
+    view: 'list',
+    dataTable: null,
     chars: document.slash_item_tools.chars,
     rawData: document.slash_item_tools.charsData,
     charsData: null
   },
   created() {
     this.handleCharData();
+    this.viewChanged();
   },
   mounted() {
     $(this.$el).popover({
@@ -81,6 +84,15 @@ let app = new Vue({
       }
       return str;
     },
+    location(item) {
+      let str = ``;
+      if (item.character) {
+        str += `<div class="mt-1 text-right"><a href="https://armory.slashdiablo.net/character/${item.character.toLowerCase()}#inventory">${item.character}</a>`;
+        if (ITEM_LOCATIONS[item.alt_position_id]) str += ` - <i>${ITEM_LOCATIONS[item.alt_position_id]} (${item.position_x}, ${item.position_y})</i>`;
+        str += `</div>`;
+      }
+      return str;
+    },
     runewordLink(runeword) {
       return `https://diablo2.diablowiki.net/${encodeURIComponent(runeword.name)}`;
     },
@@ -97,6 +109,16 @@ let app = new Vue({
         .join(", ");
     },
     allItems: function () {
+      let that = this;
+      if (!this.charsData) return;
+      return this.charsData
+        .filter(d => d.data != null)
+        .map(d => d.data)
+        .flatMap(d => [...d.items, ...(d.merc_items || [])])
+        .filter(d => d.starter_item == 0)
+        .sort((o1, o2) => that.$options.filters.itemName(o1).localeCompare(that.$options.filters.itemName(o2)))
+    },
+    allQualityItems: function () {
       let that = this;
       if (!this.charsData) return;
       return this.charsData
@@ -126,8 +148,8 @@ let app = new Vue({
         .sort((o1, o2) => that.$options.filters.itemName(o1).localeCompare(that.$options.filters.itemName(o2)))
     },
     allItemsGroupedByQuality: function () {
-      if (!this.allItems) return;
-      let o = this.groupBy(this.allItems, 'quality');
+      if (!this.allQualityItems) return;
+      let o = this.groupBy(this.allQualityItems, 'quality');
       o = Object.keys(o).map(function (key) {
         return { quality: `_${key}`, items: o[key] };
       }).reverse();
@@ -142,8 +164,8 @@ let app = new Vue({
       return this.allStacks.filter(i => i.type.match(/g[a-z]{2}/));
     },
     allJewels: function () {
-      if (!this.allItems) return;
-      return this.allItems.filter(i => i.type.match(/jew/));
+      if (!this.allQualityItems) return;
+      return this.allQualityItems.filter(i => i.type.match(/jew/));
     },
     itemCounts: function () {
       if (!this.charsData) return;
@@ -215,6 +237,16 @@ let app = new Vue({
     }
   },
   methods: {
+    viewChanged() {
+      if (this.dataTable) {
+        this.dataTable.destroy();
+      }
+      this.$nextTick(function() {
+        this.dataTable = $('.datatable').DataTable({
+          "paging": false
+        });
+      })
+    },
     groupBy(array, key) {
       const result = {}
       array.forEach(item => {

@@ -10,11 +10,19 @@
   <link rel="stylesheet" href="/css/index.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/4.5.0/darkly/bootstrap.min.css"
     integrity="sha256-MwJT4aoRf8awkXH2gl6jjykb0GW7x7QeffW2n4608a0=" crossorigin="anonymous" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" 
+    integrity="sha512-+4zCK9k+qNFUR5X+cKL9EIR+ZOhtIloNl9GIKS57V1MyNsYpYcUrUeQc9vNfzsWfV28IaLL3i96P9sdNyeRssA==" crossorigin="anonymous" />
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
     integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
     crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.0/js/bootstrap.bundle.min.js"
     integrity="sha256-Xt8pc4G0CdcRvI0nZ2lRpZ4VHng0EoUDMlGcBSQ9HiQ=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/js/jquery.dataTables.min.js" 
+    integrity="sha512-BkpSL20WETFylMrcirBahHfSnY++H2O1W+UnEEO4yNIl+jI2+zowyoGJpbtk6bx97fBXf++WJHSSK2MV4ghPcg==" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/css/dataTables.bootstrap4.min.css" 
+    integrity="sha512-PT0RvABaDhDQugEbpNMwgYBCnGCiTZMh9yOzUsJHDgl/dMhD9yjHAwoumnUk3JydV3QTcIkNDuN40CJxik5+WQ==" crossorigin="anonymous" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/js/dataTables.bootstrap4.min.js" 
+    integrity="sha512-OQlawZneA7zzfI6B1n1tjUuo3C5mtYuAWpQdg+iI9mkDoo7iFzTqnQHf+K5ThOWNJ9AbXL4+ZDwH7ykySPQc+A==" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
   <script>
     document.slash_item_tools = {
@@ -67,18 +75,49 @@
       </ul>
       <div class="tab-content mt-2">
         <div class="tab-pane fade show active" id="items" role="tabpanel">
-          <div v-for="group in allItemsGroupedByQuality">
-            <div class="item-wrapper quality" v-bind:class="[group.quality, item.ethereal ? 'ethereal' : '']" v-for="item in group.items">
-              <span v-if="item.quality == 3 || item.quality == 4 || item.quality == 6 || item.quality == 8"
-                data-toggle="popover" data-html="true" v-bind:data-content="item | popover">{{ item | itemName }} - {{item | stats}}</span>
-              <span v-else class="item" data-toggle="popover" data-html="true" v-bind:data-content="item | popover">{{ item | itemName }}
-              </span>
+
+          <div class="btn-group btn-group-toggle">
+            <label class="btn btn-primary active">
+              <input type="radio" id="list" value="list" v-model="view" v-on:change="viewChanged"><i class="fa fa-list"></i>
+            </label>
+            <label class="btn btn-primary">
+              <input type="radio" id="details" value="details" v-model="view" v-on:change="viewChanged"><i class="fa fa-table"></i>
+            </label>
+          </div>
+          <div v-if="view == 'list'">
+            <div v-for="group in allItemsGroupedByQuality">
+              <div class="item-wrapper quality" v-bind:class="[group.quality, item.ethereal ? 'ethereal' : '']" v-for="item in group.items">
+                <span v-if="item.quality == 3 || item.quality == 4 || item.quality == 6 || item.quality == 8"
+                  data-toggle="popover" data-html="true" v-bind:data-content="item | popover">{{ item | itemName }} - {{item | stats}}</span>
+                <span v-else class="item" data-toggle="popover" data-html="true" v-bind:data-content="item | popover">{{ item | itemName }}
+                </span>
+              </div>
+            </div>
+            <div class="item-wrapper quality _0" v-for="item in allStacks">
+              <span class="item" data-toggle="popover" data-html="true" v-bind:data-content="item | stats">{{ item.count }}x {{ item | itemName }}</span>
             </div>
           </div>
-          <div class="item-wrapper quality _0" v-for="item in allStacks">
-            <span class="item" data-toggle="popover" data-html="true" v-bind:data-content="item | stats">{{ item.count }}x {{ item | itemName }}</span>
+          <div v-else>
+            <table id="detailsTable" class="datatable">
+              <thead>
+                <tr>
+                  <th>Item</th>
+                  <th>Stats</th>
+                  <th>Location</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="item in allItems">
+                  <td><span class="item-wrapper quality" v-bind:class="['_' + item.quality, item.ethereal ? 'ethereal' : '']">{{ item | itemName }}</span></td>
+                  <td>{{ item | stats }}</td>
+                  <td v-html="$options.filters.location(item)"></td>
+                </tr>
+              </tbody>
+            </table>
           </div>
+
         </div>
+
         <div class="tab-pane fade" id="runewords" role="tabpanel">
           <div class="alert alert-warning" role="alert"  v-if="!availableRunewords.length">
             No Runewords can be made with your current runes.
