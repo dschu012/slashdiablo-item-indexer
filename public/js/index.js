@@ -315,7 +315,7 @@ let app = new Vue({
         .filter(d => d.data != null)
         .map(d => d.data)
         .flatMap(d => [...d.items, ...(d.merc_items || [])])
-        .filter(d => d.quality === undefined)
+        .filter(d => d.quality === undefined || d.type.startsWith("pk"))
         .forEach(d => { d.quality = 0 });
       //our own quality for runewords. make em first in list
       d
