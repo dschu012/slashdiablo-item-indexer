@@ -138,7 +138,7 @@ function openGraphDescription(data) {
     .filter(d => d.data != null)
     .map(d => d.data)
     .flatMap(d => [...d.items, ...(d.merc_items || [])])
-    .filter(d => d.starter_item == 0)
+    .filter(d => d.starter_item == 0 && d.location_id !== 2)
     .reduce((accumulator, currentValue) => {
       if (currentValue.custom_type in accumulator) {
         accumulator[currentValue.custom_type].count++;
