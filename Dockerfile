@@ -19,4 +19,4 @@ COPY . .
 
 RUN npm prune --production
 
-CMD ["node", "./app.js"]
+CMD ["node", "./bin/www"]
