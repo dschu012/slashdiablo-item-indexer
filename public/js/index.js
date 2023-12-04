@@ -8,11 +8,16 @@ let app = new Vue({
     chars: document.slash_item_tools.chars,
     rawData: document.slash_item_tools.charsData,
     charsData: null,
-    filterJunk: true
+    filterJunk: true,
+    pinned: [],
+    recent: []
   },
   created() {
     this.handleCharData();
     this.viewChanged();
+    this.pinned = JSON.parse(localStorage.getItem('pinned')) || [];
+    this.recent = JSON.parse(localStorage.getItem('recent')) || [];
+    this.addRecent();
   },
   mounted() {
     $(this.$el).popover({
@@ -21,6 +26,9 @@ let app = new Vue({
       placement: function () { return $(window).width() < 975 ? 'bottom' : 'right'; }
     });
     $('[data-toggle="tab"]').tab();
+    $("#sidebarCollapse").on('click', function(){
+      $("#sidebar").toggleClass('collapse');
+    });
   },
   filters: {
     junk(item) {
@@ -266,6 +274,12 @@ let app = new Vue({
       })
       return result
     },
+    sorted(ar, field, asc) {
+      if(!ar) {
+        return [];
+      }
+      return ar.sort((a, b) => asc ? a[field] - b[field] :  b[field] - a[field])
+    },
     sortKeys(obj) {
       return Object.keys(obj).sort().reduce(function (result, key) {
         result[key] = obj[key];
@@ -278,6 +292,27 @@ let app = new Vue({
         d.setTime(d.getTime() + (365*24*60*60*1000));
         document.cookie = `chars=${this.chars}; expires=${d.toUTCString()}; path=/`;
       }
+    },
+    formatDate(d) {
+      return new Date(d);
+    },
+    isPinned(item) {
+      return this.pinned.findIndex(i => i.chars == item.chars) >= 0;
+    },
+    pin(item) {
+      this.pinned.push(item);
+      localStorage.setItem('pinned', JSON.stringify(this.pinned));
+    },
+    unpin(item) {
+      this.pinned = this.pinned.filter(i => i.ts != item.ts);
+      localStorage.setItem('pinned', JSON.stringify(this.pinned));
+    },
+    buildCharUri(char) {
+      let url = window.location.toString();
+      if (url.indexOf('?') > 0) {
+        url = url.substring(0, url.indexOf('?'));
+      }
+      return `${url}?c=${encodeURI(char)}`
     },
     copyToClipboard() {
       let pop = $(document.querySelector("#copy")).popover();
@@ -309,6 +344,18 @@ let app = new Vue({
         alert('error communicating w/ api');
       }
       this.rawData = await response.json();
+      this.addRecent();
+    },
+    addRecent() {
+      let that = this;
+      if(this.chars) {
+        this.recent = this.recent.filter(item => item.chars != that.chars);
+        this.recent.push({ chars: this.chars, ts: new Date().getTime() });
+        if(this.recent.length > 15) {
+          this.recent.shift();
+        }
+        localStorage.setItem('recent', JSON.stringify(this.recent));
+      }
     },
     handleCharData() {
       let d = this.rawData;
