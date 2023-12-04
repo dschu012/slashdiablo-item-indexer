@@ -120,7 +120,7 @@ let app = new Vue({
         .map(d => d.data)
         .flatMap(d => [...d.items, ...(d.merc_items || [])])
         .filter(d => d.starter_item == 0)
-        .filter(d => that.filterJunk && that.$options.filters.junk(d))
+        .filter(d => !that.filterJunk || (that.filterJunk && that.$options.filters.junk(d)))
         .sort((o1, o2) => that.$options.filters.itemName(o1).localeCompare(that.$options.filters.itemName(o2)))
     },
     allQualityItems: function () {
@@ -131,7 +131,7 @@ let app = new Vue({
         .map(d => d.data)
         .flatMap(d => [...d.items, ...(d.merc_items || [])])
         .filter(d => d.quality !== 0 && d.starter_item == 0)
-        .filter(d => that.filterJunk && that.$options.filters.junk(d))
+        .filter(d => !that.filterJunk || (that.filterJunk && that.$options.filters.junk(d)))
         .sort((o1, o2) => that.$options.filters.itemName(o1).localeCompare(that.$options.filters.itemName(o2)))
     },
     allStacks: function () {
@@ -142,7 +142,7 @@ let app = new Vue({
         .map(d => d.data)
         .flatMap(d => [...d.items, ...(d.merc_items || [])])
         .filter(d => d.quality === 0 && d.location_id !== 2)
-        .filter(d => that.filterJunk && that.$options.filters.junk(d))
+        .filter(d => !that.filterJunk || (that.filterJunk && that.$options.filters.junk(d)))
         .reduce((accumulator, currentValue) => {
           if (currentValue.custom_type in accumulator) {
             accumulator[currentValue.custom_type].count++;
@@ -181,7 +181,7 @@ let app = new Vue({
         .filter(d => d.data != null)
         .map(d => d.data)
         .flatMap(d => [...d.items, ...(d.merc_items || [])])
-        .filter(d => that.filterJunk && that.$options.filters.junk(d))
+        .filter(d => !that.filterJunk || (that.filterJunk && that.$options.filters.junk(d)))
         .reduce((accumulator, currentValue) => {
           if (currentValue.count) {
             accumulator[currentValue.custom_type] = currentValue.count;

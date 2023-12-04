@@ -83,6 +83,12 @@
             <label class="btn btn-primary">
               <input type="radio" id="details" value="details" v-model="view" v-on:change="viewChanged"><i class="fa fa-table"></i>
             </label>
+            <div class="form-check m-2">
+              <input class="form-check-input" type="checkbox" v-model="filterJunk" id="filterJunk">
+              <label class="form-check-label" for="filterJunk">
+                Hide Junk?
+              </label>
+            </div>
           </div>
           <div v-if="view == 'list'">
             <div v-for="group in allItemsGroupedByQuality">
