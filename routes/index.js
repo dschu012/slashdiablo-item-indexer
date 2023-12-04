@@ -89,7 +89,8 @@ function openGraphDescription(data) {
     "toa",
     "dhn", "bey", "mbr",
     "tes", "ceh", "bet", "fed",
-    "std"
+    "std",
+    "isc", "tsc"
   ];
 
   //set quality 0 if null

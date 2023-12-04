@@ -7,7 +7,8 @@ let app = new Vue({
     dataTable: null,
     chars: document.slash_item_tools.chars,
     rawData: document.slash_item_tools.charsData,
-    charsData: null
+    charsData: null,
+    filterJunk: true
   },
   created() {
     this.handleCharData();
@@ -22,6 +23,9 @@ let app = new Vue({
     $('[data-toggle="tab"]').tab();
   },
   filters: {
+    junk(item) {
+      return !["isc", "tsc"].includes(item.type);
+    },
     itemName(item) {
       let name = item.type_name;
       if (item.runeword_name) {
@@ -116,6 +120,7 @@ let app = new Vue({
         .map(d => d.data)
         .flatMap(d => [...d.items, ...(d.merc_items || [])])
         .filter(d => d.starter_item == 0)
+        .filter(d => that.filterJunk && that.$options.filters.junk(d))
         .sort((o1, o2) => that.$options.filters.itemName(o1).localeCompare(that.$options.filters.itemName(o2)))
     },
     allQualityItems: function () {
@@ -126,6 +131,7 @@ let app = new Vue({
         .map(d => d.data)
         .flatMap(d => [...d.items, ...(d.merc_items || [])])
         .filter(d => d.quality !== 0 && d.starter_item == 0)
+        .filter(d => that.filterJunk && that.$options.filters.junk(d))
         .sort((o1, o2) => that.$options.filters.itemName(o1).localeCompare(that.$options.filters.itemName(o2)))
     },
     allStacks: function () {
@@ -136,6 +142,7 @@ let app = new Vue({
         .map(d => d.data)
         .flatMap(d => [...d.items, ...(d.merc_items || [])])
         .filter(d => d.quality === 0 && d.location_id !== 2)
+        .filter(d => that.filterJunk && that.$options.filters.junk(d))
         .reduce((accumulator, currentValue) => {
           if (currentValue.custom_type in accumulator) {
             accumulator[currentValue.custom_type].count++;
@@ -168,11 +175,13 @@ let app = new Vue({
       return this.allQualityItems.filter(i => i.type.match(/jew/));
     },
     itemCounts: function () {
+      let that = this;
       if (!this.charsData) return;
       return this.charsData
         .filter(d => d.data != null)
         .map(d => d.data)
         .flatMap(d => [...d.items, ...(d.merc_items || [])])
+        .filter(d => that.filterJunk && that.$options.filters.junk(d))
         .reduce((accumulator, currentValue) => {
           if (currentValue.count) {
             accumulator[currentValue.custom_type] = currentValue.count;
