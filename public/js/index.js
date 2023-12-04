@@ -294,7 +294,7 @@ let app = new Vue({
       }
     },
     formatDate(d) {
-      return new Date(d);
+      return Intl.DateTimeFormat("en-US", { dateStyle: 'short', timeStyle: 'long' }).format(new Date(d));
     },
     isPinned(item) {
       return this.pinned.findIndex(i => i.chars == item.chars) >= 0;
@@ -334,6 +334,7 @@ let app = new Vue({
       this.charData = [];
       await this.fetchCharacters();
       await this.handleCharData();
+      this.addRecent();
     },
     async fetchCharacters() {
       this.storeChars();
@@ -344,13 +345,18 @@ let app = new Vue({
         alert('error communicating w/ api');
       }
       this.rawData = await response.json();
-      this.addRecent();
     },
     addRecent() {
       let that = this;
       if(this.chars) {
         this.recent = this.recent.filter(item => item.chars != that.chars);
-        this.recent.push({ chars: this.chars, ts: new Date().getTime() });
+        let item = { chars: this.chars, ts: new Date().getTime(), data: this.charsData };
+        this.recent.push(item);
+        let idx = this.pinned.findIndex(i => i.chars == that.chars);
+        if(idx >= 0) {
+          this.pinned[idx] = item;
+          localStorage.setItem('pinned', JSON.stringify(this.pinned));
+        }
         if(this.recent.length > 15) {
           this.recent.shift();
         }
