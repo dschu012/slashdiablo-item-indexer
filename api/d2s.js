@@ -21,7 +21,8 @@ async function fetch_char(n) {
 
 exports.fetch_chars = async function (names) {
   let data = [];
-  names = names.split(/[,\s]/).map(d => d.toLowerCase().trim());
+  names = names.split(/[,\s]/).map(d => d.toLowerCase().trim())
+    .filter((e, i) => i < 8);
   data = Promise.all(names.map(e => fetch_char(e)));
   return data;
 }
